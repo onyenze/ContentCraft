@@ -1,6 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { log } from "node:console";
-import { console } from "node:inspector";
 
 // Extend the Request interface to include a user property
 declare global {
@@ -16,23 +14,27 @@ declare global {
 }
 
 export const adminAuthStub = (req: Request, res: Response, next: NextFunction): void => {
-  const user = {
+  const expectedToken = "jwt.token.here";
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+   res.status(401).json({ message: "Authorization header missing or invalid" });
+   return
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (token !== expectedToken) {
+   res.status(401).json({ message: "You are not authorized" });
+   return
+  }
+
+  req.user = {
     email: "admin@cms.com",
-    token: "jwt.token.here",
+    token: token,
     username: "cmsAdmin",
   };
-  // Log the request body to inspect it
-  console.log(req.body);
 
-  // Check if user object matches (by comparing properties)
-  if (
-    req.body.user?.email !== user.email ||
-    req.body.user?.token !== user.token ||
-    req.body.user?.username !== user.username
-  ) {
-     res.status(401).json({ message: "You are not authorized" });
-  } else{
-    next();
-  }
-  
+  next();
 };

@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import ContentType from '../content-types/contentTypes';
+import ContentType from '../models/contentType';
 
 // Define attributes for the FieldDefinition model
 interface FieldDefinitionAttributes {
