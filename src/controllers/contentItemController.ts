@@ -79,3 +79,23 @@ export const deleteContentItem = async (req: Request, res: Response) => {
      return;
   }
 };
+
+
+// src/controllers/contentItemController.ts
+// export const publishContentItem =async (req: Request, res: Response) {
+//   try {
+//     const contentItem = await ContentItem.findByPk(req.params.contentItemId);
+//     if (!contentItem) {
+//       return res.status(404).json({ errors: { message: 'Content item not found' } });
+//     }
+
+//     contentItem.status = 'PUBLISHED';
+//     contentItem.publishedAt = new Date();
+//     await contentItem.save();
+
+//     return res.json({ contentItem });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ errors: { message: 'Internal server error' } });
+//   }
+// }

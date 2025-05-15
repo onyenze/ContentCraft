@@ -1,49 +1,62 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from './index';
+// src/models/user.ts
+import { DataTypes, Model } from 'sequelize';
+import sequelize from '../config/database';
+import Role from './role';
 
-interface UserAttributes {
-  id: number;
-  userName: string;
-  token: string;
-  email: string;
-}
-
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
-
-class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+class User extends Model {
   public id!: number;
-  public userName!: string;
-  public token!: string;
+  public username!: string;
   public email!: string;
-
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public password!: string;
+  public roleId!: number;
+  public role?: Role;
 }
 
 User.init(
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    userName: {
-      type: new DataTypes.STRING(128),
+    username: {
+      type: DataTypes.STRING,
       allowNull: false,
-    },
-    token: {
-      type: new DataTypes.STRING(128),
-      allowNull: false,
+      unique: true,
     },
     email: {
-      type: new DataTypes.STRING(128),
+      type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'roles',
+        key: 'id',
+      },
     },
   },
   {
+    sequelize,
+    modelName: 'User',
     tableName: 'users',
-    sequelize, 
+    defaultScope: {
+      attributes: { exclude: ['password'] },
+    },
+    scopes: {
+      withPassword: {
+        attributes: { include: ['password'] },
+      },
+    },
   }
 );
 

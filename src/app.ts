@@ -5,6 +5,9 @@ import morgan from 'morgan';
 import logger from './logger';
 import contentTypeRoutes from "./routes/contentTypeRoutes";
 import contentItemRoutes from "./routes/contentItemRoutes";
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+import roleRoutes from './routes/roleRoutes';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -27,6 +30,9 @@ app.get('/', (req, res) => {
 // });
 app.use("/api", contentTypeRoutes);
 app.use("/api", contentItemRoutes);
+app.use("/api", authRoutes);
+app.use("/api", userRoutes);
+app.use("/api", roleRoutes);
 
 
 
