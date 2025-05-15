@@ -12,8 +12,7 @@ class UserRepository {
       options.scope = 'withPassword';
     }
 
-     User.findOne(options);
-     return
+    return User.findOne(options);
   }
 
   async findById(id: number, includeRoleAndPermissions = false) {
@@ -33,8 +32,7 @@ class UserRepository {
       }];
     }
 
-     User.findOne(options);
-     
+    return User.findOne(options);
   }
 }
 

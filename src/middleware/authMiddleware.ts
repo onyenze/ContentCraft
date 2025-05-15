@@ -22,6 +22,7 @@ dotenv.config({ path: '../.env' });
 // }
 // Define your JWT payload interface
 interface JwtAdminPayload {
+  id: number;
   email: string;
   username: string;
   // Add other required admin claims
@@ -50,6 +51,7 @@ export const adminAuthStub = (req: Request, res: Response, next: NextFunction): 
 
     // 4. Attach user to request
     req.user = {
+      id : decoded.id,
       email: decoded.email,
       username: decoded.username,
     };
@@ -98,6 +100,9 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       res.status(401).json({ errors: { message: 'Invalid token - user not found' } });
       return;
     }
+    
+// console.log(user);
+console.log(decoded.id);
 
     req.user = decoded;
     next();

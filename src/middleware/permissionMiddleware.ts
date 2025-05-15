@@ -1,6 +1,7 @@
 // src/middleware/permissionMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { User, Role, Permission } from '../models/associations';
+import { log } from 'console';
 
 /**
  * Middleware to check if user has specific permission
@@ -13,21 +14,25 @@ export const requirePermission = (requiredPermission: string) => {
          res.status(401).json({ errors: { message: 'Authentication required' } });
          return
       }
+      console.log(req.user);
 
       // Get the user with their role and permissions
       const user = await User.findByPk(req.user.id, {
-        include: [
-          {
+        include: [{
             model: Role,
-            include: [Permission],
-          },
-        ],
+            as: 'role',  // Must match the association alias
+            include: [{
+              model: Permission,
+              as: 'permissions'  
+            }]
+          }]
       });
 
       if (!user) {
          res.status(404).json({ errors: { message: 'User not found' } });
          return
       }
+console.log(user);
 
       // Check if user has the required permission
       const hasPermission = user.role?.permissions?.some(

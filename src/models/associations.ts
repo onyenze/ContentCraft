@@ -5,22 +5,29 @@ import Permission from './permission';
 import RolePermission from './rolePermission';
 
 // Setup associations
-Role.belongsToMany(Permission, {
-  through: RolePermission,
+// User-Role association
+User.belongsTo(Role, {
   foreignKey: 'roleId',
-  otherKey: 'permissionId',
-  as: 'permissions' // This adds the typed methods
+  as: 'role'  // This is the alias you MUST use in queries
+});
+
+Role.hasMany(User, {
+  foreignKey: 'roleId',
+  as: 'users'
+});
+
+// Role-Permission many-to-many association
+Role.belongsToMany(Permission, {
+  through: 'role_permissions',
+  as: 'permissions',
+  foreignKey: 'roleId'
 });
 
 Permission.belongsToMany(Role, {
-  through: RolePermission,
-  foreignKey: 'permissionId',
-  otherKey: 'roleId',
-  as: 'roles' // Explicit alias
+  through: 'role_permissions',
+  as: 'roles',
+  foreignKey: 'permissionId'
 });
-
-User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
-Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
 
 export { User, Role, Permission, RolePermission };
 
