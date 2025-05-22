@@ -54,7 +54,8 @@ export const getContentItemById = async (req: Request, res: Response) => {
 
 export const updateContentItem = async (req: Request, res: Response) => {
   try {
-    const updated = await contentService.updateContentItem(req.params.contentItemId, req.body);
+    const contentItemId = Number(req.params.contentItemId);
+    const updated = await contentService.updateContentItem(contentItemId, req.body);
     if (!updated)  {res.status(404).json({ error: "Content Item not found" });
     return;}
 
@@ -79,6 +80,37 @@ export const deleteContentItem = async (req: Request, res: Response) => {
      return;
   }
 };
+
+export const getContentVersions = async (req: Request, res: Response)=> {
+  try {
+    const result = await contentService.getContentVersions(Number(req.params.id));
+    res.json(result);
+  } catch (error:any) {
+    if (error.message === 'Version not found') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+}
+
+export const restoreVersion = async(req: Request, res: Response) =>{
+  try {
+    const result = await contentService.restoreVersion(
+      Number(req.params.id),
+      Number(req.params.versionId)
+    );
+    res.json(result);
+  } catch (error:any) {
+    if (error.message === 'Version not found') {
+      res.status(404).json({ error: error.message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+}
 
 
 // src/controllers/contentItemController.ts

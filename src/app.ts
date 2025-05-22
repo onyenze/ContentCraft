@@ -8,6 +8,7 @@ import contentItemRoutes from "./routes/contentItemRoutes";
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import roleRoutes from './routes/roleRoutes';
+import deliveryRoutes from './routes/deliveryRoutes';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api", contentItemRoutes);
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", roleRoutes);
+app.use("/api", deliveryRoutes);
 
 
 

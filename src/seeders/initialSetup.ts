@@ -2,6 +2,7 @@ import 'dotenv/config'; // Load environment variables first
 import sequelize from '../config/database';
 import { User, Role, Permission } from '../models/associations';
 import bcrypt from 'bcrypt';
+import { PERMISSIONS } from '../constants/permissions';
 
 async function seedInitialData() {
   console.log('Starting database seeding...');
@@ -21,33 +22,37 @@ async function seedInitialData() {
     console.log('🔄 Database tables created');
 
     // Create permissions
-    console.log('⏳ Creating permissions...');
-    const permissions = await Permission.bulkCreate([
-      { name: 'Create Content Types', identifier: 'create_content_type' },
-      { name: 'Edit Content', identifier: 'edit_content' },
-      { name: 'Publish Content', identifier: 'publish_content' },
-      { name: 'Manage Users', identifier: 'manage_users' },
-      { name: 'Manage Roles', identifier: 'manage_roles' },
-    ]);
+console.log('⏳ Creating permissions...');
+const permissionData = Object.entries(PERMISSIONS).map(([key, identifier]) => ({
+  name: key
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, c => c.toUpperCase()),
+  identifier,
+}));
+const permissions = await Permission.bulkCreate(permissionData);
 
-    // Create roles
-    console.log('⏳ Creating roles...');
-    const adminRole = await Role.create({
-      name: 'Admin',
-      description: 'Administrator with full access',
-    });
-    await adminRole.setPermissions(permissions);
+// Create roles
+console.log('⏳ Creating roles...');
+const adminRole = await Role.create({
+  name: 'Admin',
+  description: 'Administrator with full access',
+});
+await adminRole.setPermissions(permissions);
 
-    const editorRole = await Role.create({
-      name: 'Editor',
-      description: 'Can edit and publish content',
-    });
-    await editorRole.setPermissions(
-      permissions.filter(p => 
-        p.identifier === 'edit_content' || 
-        p.identifier === 'publish_content'
-      )
-    );
+const editorRole = await Role.create({
+  name: 'Editor',
+  description: 'Can edit and publish content',
+});
+await editorRole.setPermissions(
+  permissions.filter(p =>
+    [
+      PERMISSIONS.EDIT_CONTENT,
+      PERMISSIONS.PUBLISH_CONTENT,
+      PERMISSIONS.VIEW_CONTENT,
+    ].includes(p.identifier)
+  )
+);
 
     // Create admin user
     console.log('⏳ Creating admin user...');
@@ -68,3 +73,6 @@ async function seedInitialData() {
 }
 
 seedInitialData();
+
+
+

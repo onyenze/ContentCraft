@@ -5,7 +5,9 @@ import {
   getContentItemsByType,
   getContentItemById,
   updateContentItem,
-  deleteContentItem
+  deleteContentItem,
+  getContentVersions,
+  restoreVersion
 } from '../controllers/contentItemController';
 import { adminAuthStub } from "../middleware/authMiddleware";
 import { authenticate } from '../middleware/authMiddleware';
@@ -40,6 +42,12 @@ router.delete("/content-items/:contentItemId",
   adminAuthStub,
   requirePermission(PERMISSIONS.DELETE_CONTENT),
   deleteContentItem);
+
+
+router.get('/content-items/:id/versions', 
+  getContentVersions);
+ router.post('/content-items/:id/versions/:versionId/restore', 
+  restoreVersion);
 
 // Publish content item (additional endpoint)
 // router.patch(
