@@ -7,7 +7,8 @@ import {
   updateContentItem,
   deleteContentItem,
   getContentVersions,
-  restoreVersion
+  restoreVersion,
+  publishContentItem
 } from '../controllers/contentItemController';
 import { adminAuthStub } from "../middleware/authMiddleware";
 import { authenticate } from '../middleware/authMiddleware';
@@ -50,10 +51,10 @@ router.get('/content-items/:id/versions',
   restoreVersion);
 
 // Publish content item (additional endpoint)
-// router.patch(
-//   '/api/admin/content-items/:contentItemId/publish',
-//   authenticate,
-//   requirePermission(PERMISSIONS.PUBLISH_CONTENT),
-//   contentItemController.publishContentItem
-// );
+router.patch(
+  '/admin/content-items/:contentItemId/publish',
+  authenticate,
+  requirePermission(PERMISSIONS.PUBLISH_CONTENT),
+  publishContentItem
+);
 export default router;

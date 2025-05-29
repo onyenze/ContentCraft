@@ -9,11 +9,12 @@ module.exports = {
       },
       contentItemId: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull: false,
         references: {
           model: 'content_items',
-          key: 'id'
-        }
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       data: {
         type: Sequelize.JSON,

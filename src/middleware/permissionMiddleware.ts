@@ -14,8 +14,6 @@ export const requirePermission = (requiredPermission: string) => {
          res.status(401).json({ errors: { message: 'Authentication required' } });
          return
       }
-      console.log(req.user);
-
       // Get the user with their role and permissions
       const user = await User.findByPk(req.user.id, {
         include: [{
@@ -32,8 +30,6 @@ export const requirePermission = (requiredPermission: string) => {
          res.status(404).json({ errors: { message: 'User not found' } });
          return
       }
-console.log(user);
-
       // Check if user has the required permission
       const hasPermission = user.role?.permissions?.some(
         (permission) => permission.identifier === requiredPermission

@@ -50,6 +50,7 @@ import {
       status: {
         type: DataTypes.ENUM('DRAFT', 'REVIEW', 'PUBLISHED'),
         allowNull: false,
+        defaultValue: "DRAFT"
       },
       data: {
         type: DataTypes.JSON,

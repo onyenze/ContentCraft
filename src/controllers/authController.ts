@@ -7,7 +7,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await AuthService.login(email, password);
-      res.json(result);
+      res.status(200).json(result);
       return
     } catch (error) {
       console.error(error);

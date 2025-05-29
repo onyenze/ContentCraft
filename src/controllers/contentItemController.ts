@@ -114,20 +114,23 @@ export const restoreVersion = async(req: Request, res: Response) =>{
 
 
 // src/controllers/contentItemController.ts
-// export const publishContentItem =async (req: Request, res: Response) {
-//   try {
-//     const contentItem = await ContentItem.findByPk(req.params.contentItemId);
-//     if (!contentItem) {
-//       return res.status(404).json({ errors: { message: 'Content item not found' } });
-//     }
+export const publishContentItem =async (req: Request, res: Response)=> {
+  try {
+    const contentItem = await contentService.getContentItemById(req.params.contentItemId);
+    if (!contentItem) {
+       res.status(404).json({ errors: { message: 'Content item not found' } });
+       return
+    }
 
-//     contentItem.status = 'PUBLISHED';
-//     contentItem.publishedAt = new Date();
-//     await contentItem.save();
+    contentItem.status = 'PUBLISHED';
+    contentItem.publishedAt = new Date();
+    await contentItem.save();
 
-//     return res.json({ contentItem });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ errors: { message: 'Internal server error' } });
-//   }
-// }
+     res.json({ contentItem });
+     return
+  } catch (error) {
+    console.error(error);
+     res.status(500).json({ errors: { message: 'Internal server error' } });
+     return
+  }
+}
