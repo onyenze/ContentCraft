@@ -3,6 +3,10 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import UserRepository from '../repositories/auth';
 import { JwtPayload } from '../interfaces.ts/auth.interfaces';
+import  dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config({ path: '../.env' });
 
 class AuthService {
   async login(email: string, password: string) {
@@ -19,14 +23,13 @@ class AuthService {
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
-
     const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
         roleId: user.roleId
       } as JwtPayload,
-      "JWT_SECRET",
+      process.env.JWT_SECRET!,
       { expiresIn: '24h' }
     );
 

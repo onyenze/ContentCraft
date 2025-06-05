@@ -1,8 +1,7 @@
 // // tests/controllers/contentItemController.test.ts
 // import request from 'supertest';
 // import app from '../../src/app';
-// import { ContentType, ContentItem } from '../../src/models/associations';
-// import FieldDefinition from '../../src/models/fieldDefinition';
+// import { ContentType, ContentItem, FieldDefinition } from '../../src/models/associations';
 // jest.mock('../../src/models');
 
 // const mockedContentType = ContentType as jest.Mocked<typeof ContentType>;
@@ -14,261 +13,238 @@
 //     jest.clearAllMocks();
 //   });
 
-//   describe('GET /api/admin/content-types/:contentTypeIdentifier/content-items', () => {
-//     it('should list content items for a content type', async () => {
-//       const mockContentType = {
-//         id: 1,
-//         identifier: 'article',
-//       };
-      
-//       const mockContentItems = [
-//         { id: 1, contentTypeId: 1, title: 'First Article', slug: 'first-article' },
-//         { id: 2, contentTypeId: 1, title: 'Second Article', slug: 'second-article' },
-//       ];
-      
-//       mockedContentType.findOne.mockResolvedValue(mockContentType);
-//       mockedContentItem.findAll.mockResolvedValue(mockContentItems);
-//       mockedContentItem.count.mockResolvedValue(2);
+//   const mockContentType = jest.fn(() => ({
+//   id: 1,
+//   identifier: 'article',
+//   fields: [
+//     { identifier: 'title', dataType: 'string', required: true },
+//     { identifier: 'body', dataType: 'longText', required: true },
+//   ],
+//   // Add any other properties or methods required by your model
+// }))();
 
-//       const response = await request(app)
+//   const mockContentItem = {
+//     id: 1,
+//     contentTypeId: 1,
+//     title: 'Sample Article',
+//     slug: 'sample-article',
+//     data: { title: 'Sample Article', body: 'Content goes here' },
+//     status: 'DRAFT',
+//     publishedAt: null,
+//     save: jest.fn().mockResolvedValue(true),
+//     destroy: jest.fn().mockResolvedValue(true),
+//     update: jest.fn().mockResolvedValue(true),
+//     toJSON: function () {
+//       return { ...this };
+//     },
+//   };
+
+//   describe('GET /api/admin/content-types/:contentTypeIdentifier/content-items', () => {
+//     it('should return list of content items', async () => {
+//       mockedContentType.findOne.mockResolvedValue(mockContentType);
+//       mockedContentItem.findAll.mockResolvedValue([mockContentItem]);
+//       mockedContentItem.count.mockResolvedValue(1);
+
+//       const res = await request(app)
 //         .get('/api/admin/content-types/article/content-items')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(200);
-//       expect(response.body).toHaveProperty('contentItems');
-//       expect(response.body.contentItems).toHaveLength(2);
-//       expect(response.body).toHaveProperty('contentItemsCount', 2);
+//       expect(res.status).toBe(200);
+//       expect(res.body.contentItems).toHaveLength(1);
 //     });
 
-//     it('should return 404 for non-existent content type', async () => {
+//     it('should return 404 if content type not found', async () => {
 //       mockedContentType.findOne.mockResolvedValue(null);
 
-//       const response = await request(app)
-//         .get('/api/admin/content-types/nonexistent/content-items')
+//       const res = await request(app)
+//         .get('/api/admin/content-types/unknown/content-items')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(404);
+//       expect(res.status).toBe(404);
 //     });
 //   });
 
 //   describe('POST /api/admin/content-types/:contentTypeIdentifier/content-items', () => {
-//     it('should create a new content item', async () => {
-//       const mockContentType = {
-//         id: 1,
-//         identifier: 'article',
-//         fieldDefinitions: [
-//           { identifier: 'title', dataType: 'string', required: true },
-//           { identifier: 'body', dataType: 'longText', required: true },
-//         ],
-//       };
-      
-//       const mockContentItem = {
-//         id: 1,
-//         contentTypeId: 1,
-//         title: 'New Article',
-//         slug: 'new-article',
-//         data: { title: 'New Article', body: 'Content here' },
-//         toJSON: () => ({
-//           id: 1,
-//           contentTypeId: 1,
-//           title: 'New Article',
-//           slug: 'new-article',
-//           data: { title: 'New Article', body: 'Content here' },
-//         }),
-//       };
-      
+//     it('should create new content item', async () => {
 //       mockedContentType.findOne.mockResolvedValue(mockContentType);
-//       mockedContentItem.create.mockResolvedValue(mockContentItem);
+//       mockedContentItem.create.mockResolvedValue(mockContentItem as any);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .post('/api/admin/content-types/article/content-items')
 //         .set('Authorization', 'Bearer valid-token')
 //         .send({
-//           title: 'New Article',
-//           slug: 'new-article',
-//           data: {
-//             title: 'New Article',
-//             body: 'Content here',
-//           },
+//           title: 'Sample Article',
+//           slug: 'sample-article',
+//           data: { title: 'Sample Article', body: 'Content goes here' },
 //         });
 
-//       expect(response.status).toBe(201);
-//       expect(response.body).toHaveProperty('contentItem');
-//       expect(response.body.contentItem.title).toBe('New Article');
-//       expect(mockedContentItem.create).toHaveBeenCalledWith({
-//         title: 'New Article',
-//         slug: 'new-article',
-//         contentTypeId: 1,
-//         data: { title: 'New Article', body: 'Content here' },
-//         status: 'DRAFT',
-//       });
+//       expect(res.status).toBe(201);
+//       expect(mockedContentItem.create).toHaveBeenCalled();
 //     });
 
-//     it('should return 400 when missing required fields', async () => {
-//       const mockContentType = {
-//         id: 1,
-//         identifier: 'article',
-//         fieldDefinitions: [
-//           { identifier: 'title', dataType: 'string', required: true },
-//           { identifier: 'body', dataType: 'longText', required: true },
-//         ],
-//       };
-      
+//     it('should return 400 if required fields missing', async () => {
 //       mockedContentType.findOne.mockResolvedValue(mockContentType);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .post('/api/admin/content-types/article/content-items')
 //         .set('Authorization', 'Bearer valid-token')
 //         .send({
-//           title: 'New Article',
-//           slug: 'new-article',
-//           data: {
-//             // Missing body field
-//             title: 'New Article',
-//           },
+//           title: 'Sample Article',
+//           slug: 'sample-article',
+//           data: { title: 'Only title provided' },
 //         });
 
-//       expect(response.status).toBe(400);
-//       expect(response.body).toHaveProperty('errors');
+//       expect(res.status).toBe(400);
 //     });
 
-//     it('should return 404 for non-existent content type', async () => {
+//     it('should return 404 if content type not found', async () => {
 //       mockedContentType.findOne.mockResolvedValue(null);
 
-//       const response = await request(app)
-//         .post('/api/admin/content-types/nonexistent/content-items')
+//       const res = await request(app)
+//         .post('/api/admin/content-types/unknown/content-items')
 //         .set('Authorization', 'Bearer valid-token')
 //         .send({
-//           title: 'New Article',
-//           slug: 'new-article',
-//           data: {
-//             title: 'New Article',
-//             body: 'Content here',
-//           },
+//           title: 'Sample Article',
+//           slug: 'sample-article',
+//           data: { title: 'Sample', body: 'Content' },
 //         });
 
-//       expect(response.status).toBe(404);
+//       expect(res.status).toBe(404);
 //     });
 //   });
 
-//   describe('GET /api/admin/content-items/:contentItemId', () => {
-//     it('should get a content item by ID', async () => {
-//       const mockContentItem = {
-//         id: 1,
-//         contentTypeId: 1,
-//         title: 'Existing Article',
-//         slug: 'existing-article',
-//         data: { title: 'Existing Article', body: 'Existing content' },
-//         toJSON: () => ({
-//           id: 1,
-//           contentTypeId: 1,
-//           title: 'Existing Article',
-//           slug: 'existing-article',
-//           data: { title: 'Existing Article', body: 'Existing content' },
-//         }),
-//       };
-      
-//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem);
+//   describe('GET /api/admin/content-items/:id', () => {
+//     it('should return content item by id', async () => {
+//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem as any);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .get('/api/admin/content-items/1')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(200);
-//       expect(response.body).toHaveProperty('contentItem');
-//       expect(response.body.contentItem.id).toBe(1);
+//       expect(res.status).toBe(200);
+//       expect(res.body.contentItem.id).toBe(1);
 //     });
 
-//     it('should return 404 for non-existent content item', async () => {
+//     it('should return 404 if content item not found', async () => {
 //       mockedContentItem.findByPk.mockResolvedValue(null);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .get('/api/admin/content-items/999')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(404);
+//       expect(res.status).toBe(404);
 //     });
 //   });
 
-//   describe('PUT /api/admin/content-items/:contentItemId', () => {
-//     it('should update a content item', async () => {
-//       const mockContentItem = {
-//         id: 1,
-//         contentTypeId: 1,
-//         title: 'Updated Article',
-//         slug: 'updated-article',
-//         data: { title: 'Updated Article', body: 'Updated content' },
-//         update: jest.fn().mockResolvedValue(true),
-//         toJSON: () => ({
-//           id: 1,
-//           contentTypeId: 1,
-//           title: 'Updated Article',
-//           slug: 'updated-article',
-//           data: { title: 'Updated Article', body: 'Updated content' },
-//         }),
-//       };
-      
-//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem);
+//   describe('PUT /api/admin/content-items/:id', () => {
+//     it('should update content item', async () => {
+//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem as any);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .put('/api/admin/content-items/1')
 //         .set('Authorization', 'Bearer valid-token')
 //         .send({
-//           title: 'Updated Article',
-//           slug: 'updated-article',
-//           data: {
-//             title: 'Updated Article',
-//             body: 'Updated content',
-//           },
+//           title: 'Updated',
+//           slug: 'updated',
+//           data: { title: 'Updated', body: 'Updated content' },
 //         });
 
-//       expect(response.status).toBe(200);
-//       expect(response.body).toHaveProperty('contentItem');
-//       expect(response.body.contentItem.title).toBe('Updated Article');
+//       expect(res.status).toBe(200);
 //     });
 
-//     it('should return 404 for non-existent content item', async () => {
+//     it('should return 404 if content item not found', async () => {
 //       mockedContentItem.findByPk.mockResolvedValue(null);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .put('/api/admin/content-items/999')
 //         .set('Authorization', 'Bearer valid-token')
-//         .send({
-//           title: 'Updated Article',
-//           data: {
-//             title: 'Updated Article',
-//           },
-//         });
+//         .send({ title: 'Updated' });
 
-//       expect(response.status).toBe(404);
+//       expect(res.status).toBe(404);
 //     });
 //   });
 
-//   describe('DELETE /api/admin/content-items/:contentItemId', () => {
-//     it('should delete a content item', async () => {
-//       const mockContentItem = {
-//         id: 1,
-//         destroy: jest.fn().mockResolvedValue(true),
-//       };
-      
-//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem);
+//   describe('DELETE /api/admin/content-items/:id', () => {
+//     it('should delete content item', async () => {
+//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem as any);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .delete('/api/admin/content-items/1')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(204);
-//       expect(mockContentItem.destroy).toHaveBeenCalled();
+//       expect(res.status).toBe(204);
 //     });
 
-//     it('should return 404 for non-existent content item', async () => {
+//     it('should return 404 if content item not found', async () => {
 //       mockedContentItem.findByPk.mockResolvedValue(null);
 
-//       const response = await request(app)
+//       const res = await request(app)
 //         .delete('/api/admin/content-items/999')
 //         .set('Authorization', 'Bearer valid-token');
 
-//       expect(response.status).toBe(404);
+//       expect(res.status).toBe(404);
+//     });
+//   });
+
+//   describe('PATCH /api/admin/content-items/:id/publish', () => {
+//     it('should publish a content item', async () => {
+//       mockedContentItem.findByPk.mockResolvedValue(mockContentItem as any);
+
+//       const res = await request(app)
+//         .patch('/api/admin/content-items/1/publish')
+//         .set('Authorization', 'Bearer valid-token');
+
+//       expect(res.status).toBe(200);
+//       expect(mockContentItem.save).toHaveBeenCalled();
+//     });
+
+//     it('should return 404 if content item not found', async () => {
+//       mockedContentItem.findByPk.mockResolvedValue(null);
+
+//       const res = await request(app)
+//         .patch('/api/admin/content-items/999/publish')
+//         .set('Authorization', 'Bearer valid-token');
+
+//       expect(res.status).toBe(404);
+//     });
+//   });
+
+//   describe('GET /api/admin/content-items/:id/versions', () => {
+//     it('should return versions of content item', async () => {
+//       jest.spyOn(require('../../src/services/contentItem'), 'getContentVersions')
+//         .mockResolvedValue([{ version: 1 }, { version: 2 }]);
+
+//       const res = await request(app)
+//         .get('/api/admin/content-items/1/versions')
+//         .set('Authorization', 'Bearer valid-token');
+
+//       expect(res.status).toBe(200);
+//       expect(res.body).toHaveLength(2);
+//     });
+//   });
+
+//   describe('POST /api/admin/content-items/:id/versions/:versionId/restore', () => {
+//     it('should restore a version', async () => {
+//       jest.spyOn(require('../../src/services/contentItem'), 'restoreVersion')
+//         .mockResolvedValue({ success: true });
+
+//       const res = await request(app)
+//         .post('/api/admin/content-items/1/versions/2/restore')
+//         .set('Authorization', 'Bearer valid-token');
+
+//       expect(res.status).toBe(200);
+//       expect(res.body).toHaveProperty('success');
+//     });
+
+//     it('should return 404 if version not found', async () => {
+//       jest.spyOn(require('../../src/services/contentItem'), 'restoreVersion')
+//         .mockRejectedValue(new Error('Version not found'));
+
+//       const res = await request(app)
+//         .post('/api/admin/content-items/1/versions/999/restore')
+//         .set('Authorization', 'Bearer valid-token');
+
+//       expect(res.status).toBe(404);
 //     });
 //   });
 // });

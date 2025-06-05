@@ -57,8 +57,5 @@ FieldDefinition.init({
   tableName:'field_definitions'
 });
 
-// Setup the relationship: ContentType hasMany FieldDefinition
-ContentType.hasMany(FieldDefinition, { foreignKey: 'contentTypeId', as: 'fields' , onDelete: "CASCADE",});
-FieldDefinition.belongsTo(ContentType, { foreignKey: 'contentTypeId', as: 'contentType' });
 
 export default FieldDefinition;

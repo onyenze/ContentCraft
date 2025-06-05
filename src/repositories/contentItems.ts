@@ -77,6 +77,10 @@ export const getCurrentVersion = async (contentItemId: number) =>{
   });
 }
 
+export const findAllContentItems = async (data: any) => {
+  return  ContentItem.findAll({ where: data });
+};
+
 // Delete a content item
 export const deleteContentItem = async (id: string) => {
   const contentItem = await ContentItem.findByPk(id);

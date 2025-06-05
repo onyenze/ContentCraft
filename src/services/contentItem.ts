@@ -1,14 +1,28 @@
 import * as contentItemRepo from "../repositories/contentItems";
 import * as contentTypeRepo from "../repositories/contentType";
 import  sequelize  from "../config/database";
-import ContentVersion from "../models/contentVersion";
-import ContentItem from "../models/contentItem";
+import {ContentVersion,ContentItem,FieldDefinition} from "../models/associations";
+
 // Create a new content item for a specific content type
 export const createContentItem = async (contentTypeIdentifier: string, itemData: any) => {
   const contentType = await contentTypeRepo.findContentTypeByIdentifier(contentTypeIdentifier);
+
   if (!contentType) throw new Error("ContentType not found");
 
-  // You could validate itemData.data here against contentType.fields if needed
+  // contentType.fields should be available here if include is used in the repo
+  const fieldDefinitions = contentType.fields as FieldDefinition[];
+
+  if (!fieldDefinitions) {
+    throw new Error('Field definitions not loaded for this content type');
+  }
+
+  const requiredFields = fieldDefinitions.map(fd => fd.identifier);
+
+  const missingFields = requiredFields.filter(field => !(field in itemData.data));
+
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
 
   return contentItemRepo.createContentItem({
     contentTypeIdentifier,

@@ -1,6 +1,7 @@
 // src/controllers/deliveryController.ts
 import { Request, Response } from 'express';
 import DeliveryService from '../services/delivery';
+import {findAllContentItems} from '../repositories/contentItems';
 
 import { Op, where, fn, col, cast, literal } from 'sequelize';
 import ContentItem from '../models/contentItem';
@@ -45,7 +46,7 @@ class DeliveryController {
 
 
 
- async getContentItems  (req: Request, res: Response) {
+ async getContentItems(req: Request, res: Response) {
   const { search } = req.query;
 
   try {
@@ -54,31 +55,31 @@ class DeliveryController {
     };
 
     if (search && typeof search === 'string') {
+      const keyword = `%${search}%`;
+
       whereClause[Op.or] = [
-        { title: { [Op.iLike]: `%${search}%` } },
-        { slug: { [Op.iLike]: `%${search}%` } },
-        where(cast(col("data->>'body'"), 'TEXT'), {
-          [Op.iLike]: `%${search}%`
+        { title: { [Op.like]: keyword } },
+        { slug: { [Op.like]: keyword } },
+        where(fn('JSON_UNQUOTE', fn('JSON_EXTRACT', col('data'), '$.body')), {
+          [Op.like]: keyword,
         }),
-        where(cast(col("data->>'title'"), 'TEXT'), {
-          [Op.iLike]: `%${search}%`
+        where(fn('JSON_UNQUOTE', fn('JSON_EXTRACT', col('data'), '$.title')), {
+          [Op.like]: keyword,
         }),
-        where(cast(col("data->>'authorName'"), 'TEXT'), {
-          [Op.iLike]: `%${search}%`
-        })
+        where(fn('JSON_UNQUOTE', fn('JSON_EXTRACT', col('data'), '$.authorName')), {
+          [Op.like]: keyword,
+        }),
       ];
     }
 
-    const items = await ContentItem.findAll({ where: whereClause });
+    const items = await findAllContentItems(whereClause);
 
     res.status(200).json(items);
-    return
   } catch (error) {
     console.error('Error fetching content items:', error);
     res.status(500).json({ error: 'Failed to fetch content items' });
-    return
   }
-};
+}
 
 }
 

@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import FieldDefinition from './fieldDefinition';
 
 // Define attributes for the ContentType model
 interface ContentTypeAttributes {
@@ -18,6 +19,7 @@ class ContentType extends Model<ContentTypeAttributes, ContentTypeCreationAttrib
   public name!: string;
   public identifier!: string;
   public description?: string;
+  public fields?: FieldDefinition[];
 }
 
 ContentType.init({

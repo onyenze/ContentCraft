@@ -41,8 +41,7 @@ export const adminAuthStub = (req: Request, res: Response, next: NextFunction): 
 
   try {
     // 2. Verify and decode the JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "JWT_SECRET") as JwtAdminPayload;
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtAdminPayload;
     // 3. Verify admin credentials
     if (decoded.email !== "admin@cms.com" && decoded.username !== "cmsAdmin") {
        res.status(403).json({ message: "Admin access required" });
@@ -92,7 +91,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, "JWT_SECRET") as JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     
 
     const user = await User.findByPk(decoded.id);
@@ -100,10 +99,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       res.status(401).json({ errors: { message: 'Invalid token - user not found' } });
       return;
     }
-    
-// console.log(user);
-console.log(decoded.id);
-
     req.user = decoded;
     next();
   } catch (error) {

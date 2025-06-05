@@ -19,9 +19,9 @@ router.get('/admin/users/:id',
     requirePermission(PERMISSIONS.MANAGE_USERS),
     userController.getUser);
 router.post('/admin/users', 
-    // authenticate, 
-    // adminAuthStub, 
-    // requirePermission(PERMISSIONS.MANAGE_USERS),
+    authenticate, 
+    adminAuthStub, 
+    requirePermission(PERMISSIONS.MANAGE_USERS),
     userController.createUser);
 router.put('/admin/users/:id', 
     authenticate, 

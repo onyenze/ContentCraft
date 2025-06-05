@@ -9,12 +9,18 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import roleRoutes from './routes/roleRoutes';
 import deliveryRoutes from './routes/deliveryRoutes';
+import fieldDefinitionRoutes from './routes/fieldDefinitionsRoutes';
 import bodyParser from 'body-parser';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+const swaggerDocument = YAML.load('./src/docs/api-spec.yaml');
+
 
 const app = express();
-
 app.use(express.json());
 app.use(bodyParser.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middleware for logging requests
 app.use(morgan('combined'));
@@ -35,6 +41,8 @@ app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", deliveryRoutes);
+app.use('/api', fieldDefinitionRoutes);
+
 
 
 

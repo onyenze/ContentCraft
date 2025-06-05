@@ -1,0 +1,497 @@
+openapi: 3.0.3
+info:
+  title: ContentCraft CMS API
+  version: 1.0.0
+  description: |
+    Admin and content delivery API for ContentCraft headless CMS.
+    **Authorization**: Bearer token required for all `/admin` and protected routes.
+servers:
+  - url: http://localhost:3500
+    description: Local development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Models
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string, format: email }
+        roleId: { type: integer }
+        role: { $ref: '#/components/schemas/Role' }
+    Role:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        permissions:
+          type: array
+          items: { $ref: '#/components/schemas/Permission' }
+    Permission:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        identifier: { type: string }
+        description: { type: string, nullable: true }
+    FieldDefinition:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        identifier: { type: string }
+        dataType: { type: string }
+        contentTypeId: { type: integer }
+    ContentType:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        identifier: { type: string }
+        description: { type: string }
+        fieldDefinitions:
+          type: array
+          items: { $ref: '#/components/schemas/FieldDefinition' }
+    ContentItem:
+      type: object
+      properties:
+        id: { type: integer }
+        contentTypeIdentifier: { type: string }
+        title: { type: string }
+        slug: { type: string }
+        status:
+          type: string
+          enum: [DRAFT, REVIEW, PUBLISHED]
+        publishedAt:
+          type: string
+          format: date-time
+        data: { type: object, additionalProperties: true }
+    ContentVersion:
+      type: object
+      properties:
+        id: { type: integer }
+        contentItemId: { type: integer }
+        data: { type: object, additionalProperties: true }
+        isCurrent: { type: boolean }
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Admin Auth
+  - name: Admin: Users
+  - name: Admin: Roles
+  - name: Admin: ContentSetup
+  - name: Delivery
+  - name: Versions
+
+paths:
+  /admin/auth/login:
+    post:
+      tags: [Admin Auth]
+      summary: Authenticate admin user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+  /admin/auth/me:
+    get:
+      tags: [Admin Auth]
+      summary: Get current authenticated admin
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # User Management
+  /admin/users:
+    get:
+      tags: [Admin: Users]
+      summary: List all users
+      description: Requires permission: `manage_users`
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+                  usersCount: { type: integer }
+    post:
+      tags: [Admin: Users]
+      summary: Create new user
+      description: Requires permission: `manage_users`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, roleId]
+              properties:
+                username: { type: string }
+                email: { type: string }
+                password: { type: string }
+                roleId: { type: integer }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /admin/users/{id}:
+    get:
+      tags: [Admin: Users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags: [Admin: Users]
+      summary: Update user
+      description: Requires permission: `manage_users`
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                email: { type: string }
+                password: { type: string }
+                roleId: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags: [Admin: Users]
+      summary: Delete user
+      description: Requires permission: `manage_users`
+      responses:
+        '204':
+          description: No content
+
+  # Role Management
+  /admin/roles:
+    get:
+      tags: [Admin: Roles]
+      summary: List all roles
+      description: Requires permission: `manage_roles`
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+    post:
+      tags: [Admin: Roles]
+      summary: Create new role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                permissions:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /admin/roles/{id}:
+    get:
+      tags: [Admin: Roles]
+      summary: Get role by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+    put:
+      tags: [Admin: Roles]
+      summary: Update a role
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                permissions:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+    delete:
+      tags: [Admin: Roles]
+      summary: Delete role
+      responses:
+        '204':
+          description: No content
+
+  # Field Definitions
+  /field-definitions:
+    get:
+      tags: [Admin: ContentSetup]
+      summary: List all field definitions
+    post:
+      tags: [Admin: ContentSetup]
+      summary: Create field definition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldDefinition'
+      responses:
+        '201': { description: Created }
+
+  # Content Type Management
+  /content-types:
+    get:
+      tags: [Admin: ContentSetup]
+      summary: List content types
+    post:
+      tags: [Admin: ContentSetup]
+      summary: Create a content type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentType'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentType'
+
+  /content-types/{identifier}:
+    get:
+      tags: [Admin: ContentSetup]
+      summary: Get content type by identifier
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentType'
+    put:
+      tags: [Admin: ContentSetup]
+      summary: Update content type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentType'
+    delete:
+      tags: [Admin: ContentSetup]
+      summary: Delete content type
+      responses:
+        '204':
+          description: No content
+
+  # Content Items
+  /content-types/{contentTypeIdentifier}/content-items:
+    get:
+      tags: [Delivery]
+      summary: List published content items
+      parameters:
+        - name: contentTypeIdentifier
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ContentItem' }
+    post:
+      tags: [Admin: ContentSetup]
+      summary: Create content item
+      description: Requires `create_content` permission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentItem'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+
+  /content-items/{id}:
+    get:
+      tags: [Delivery]
+      summary: Get content item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+    put:
+      tags: [Admin: ContentSetup]
+      summary: Update content item
+      description: Requires `edit_content` permission.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentItem'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+    delete:
+      tags: [Admin: ContentSetup]
+      summary: Delete content item
+      description: Requires `delete_content` permission.
+      responses:
+        '204':
+          description: No content
+
+  # Publish Content Item
+  /admin/content-items/{contentItemId}/publish:
+    patch:
+      tags: [Admin: ContentSetup]
+      summary: Publish content item
+      description: Requires `publish_content` permission.
+      parameters:
+        - name: contentItemId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'
+
+  # Content Versions
+  /content-items/{id}/versions:
+    get:
+      tags: [Versions]
+      summary: List versions of a content item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ContentVersion' }
+  /content-items/{id}/versions/{versionId}/restore:
+    post:
+      tags: [Versions]
+      summary: Restore a specific version
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: versionId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentItem'

@@ -6,6 +6,7 @@ import RolePermission from './rolePermission';
 import  ContentItem  from './contentItem';
 import ContentType from './contentType';
 import ContentVersion from './contentVersion';
+import FieldDefinition from './fieldDefinition';
 
 // Setup associations
 // User-Role association
@@ -57,7 +58,19 @@ ContentVersion.belongsTo(ContentItem, {
   as: 'contentItem'
 });
 
-export { User, Role, Permission, RolePermission ,ContentItem,ContentType,ContentVersion};
+
+// Setup the relationship: ContentType hasMany FieldDefinition
+ContentType.hasMany(FieldDefinition, 
+  { foreignKey: 'contentTypeId', 
+    as: 'fields' ,
+    onDelete: "CASCADE",});
+
+
+FieldDefinition.belongsTo(ContentType,
+   { foreignKey: 'contentTypeId', 
+    as: 'contentType' });
+
+export { User, Role, Permission, RolePermission ,ContentItem,ContentType,ContentVersion, FieldDefinition};
 
 
 

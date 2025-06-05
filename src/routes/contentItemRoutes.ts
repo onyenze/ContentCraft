@@ -46,14 +46,21 @@ router.delete("/content-items/:contentItemId",
 
 
 router.get('/content-items/:id/versions', 
+  authenticate,
+  adminAuthStub,
   getContentVersions);
+
+
  router.post('/content-items/:id/versions/:versionId/restore', 
+  authenticate,
+  adminAuthStub,
   restoreVersion);
 
 // Publish content item (additional endpoint)
 router.patch(
   '/admin/content-items/:contentItemId/publish',
   authenticate,
+  adminAuthStub,
   requirePermission(PERMISSIONS.PUBLISH_CONTENT),
   publishContentItem
 );

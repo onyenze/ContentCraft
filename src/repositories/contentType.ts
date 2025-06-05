@@ -1,5 +1,4 @@
-import ContentType from '../models/contentType';
-import FieldDefinition from '../models/fieldDefinition';
+import {ContentType,FieldDefinition} from '../models/associations';
 
 export const createContentType = async (identifier: string, name: string, description?: string) => {
   return ContentType.create({ identifier, name, description });
@@ -19,8 +18,14 @@ export const getContentTypeByIdentifier = async (identifier: string) => {
 };
 
 export const findContentTypeByIdentifier = async (identifier: string) => {
-  return ContentType.findOne({ where: { identifier } });
-};
+    return ContentType.findOne({
+      where: { identifier },
+      include: [{
+        model: FieldDefinition,
+        as: 'fields'
+      }]
+    });
+  }
 
 export const updateContentType = async (
   identifier: string,
