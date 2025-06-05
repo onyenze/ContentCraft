@@ -19,28 +19,28 @@ const router = Router();
 
 router.post( '/content-types/:contentTypeIdentifier/content-items',
   authenticate,
-  adminAuthStub,
+  // adminAuthStub,
   requirePermission(PERMISSIONS.CREATE_CONTENT),
   createContentItem);
 router.get('/content-types/:contentTypeIdentifier/content-items', 
   authenticate,
-  adminAuthStub,
+  // adminAuthStub,
   requirePermission(PERMISSIONS.VIEW_CONTENT),
   getContentItemsByType );
 router.get( '/content-items/:contentItemId',
   authenticate,
-  adminAuthStub,
+  // adminAuthStub,
   requirePermission(PERMISSIONS.VIEW_CONTENT),
   getContentItemById );
 router.put("/content-items/:contentItemId",
   authenticate,
-  adminAuthStub,
+  // adminAuthStub,
   requirePermission(PERMISSIONS.EDIT_CONTENT),
   updateContentItem);
 
 router.delete("/content-items/:contentItemId",
   authenticate,
-  adminAuthStub,
+  // adminAuthStub,
   requirePermission(PERMISSIONS.DELETE_CONTENT),
   deleteContentItem);
 

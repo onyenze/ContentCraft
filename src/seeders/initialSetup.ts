@@ -7,10 +7,11 @@ import { PERMISSIONS } from '../constants/permissions';
 async function seedInitialData() {
   console.log('Starting database seeding...');
   console.log('Using database config:', {
-    database: "content_craft_dev",
-    user: 'root',
-    host: '127.0.0.1',
-    password: 'Buttowski123@',
+    DB_NAME: process.env.DB_NAME,
+    DB_USERNAME: process.env.DB_USERNAME,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_HOST: process.env.DB_HOST,
+    DB_PORT: process.env.DB_PORT,
   });
 
   try {

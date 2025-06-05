@@ -6,8 +6,8 @@ info:
     Admin and content delivery API for ContentCraft headless CMS.
     **Authorization**: Bearer token required for all `/admin` and protected routes.
 servers:
-  - url: http://localhost:3500
-    description: Local development server
+  - url: http://localhost:3500/api
+    # description: Local development server
 
 components:
   securitySchemes:
